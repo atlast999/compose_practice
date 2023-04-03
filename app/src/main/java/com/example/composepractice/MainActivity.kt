@@ -3,88 +3,57 @@ package com.example.composepractice
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var username by remember {
-                mutableStateOf("")
+            val items = remember {
+                mutableStateListOf("")
             }
-            val snackbarHostState = remember {
-                SnackbarHostState()
+            LaunchedEffect(key1 = true) {
+                delay(2000)
+                repeat(20) {
+                    items.add("Number: $it")
+                }
             }
-            var confirmedState by remember {
-                mutableStateOf(false)
-            }
-            LoginForm(
-                modifier = Modifier.fillMaxSize(),
-                snackbarHostState = snackbarHostState,
-                username = username,
-                onUsernameChanged = {
-                    username = it
-                    confirmedState = false
-                },
-                onConfirmed = {
-                    confirmedState = true
-                },
-                isConfirmClicked = confirmedState,
-            )
+            ListItem(items = items)
         }
     }
 }
 
 @Composable
-fun LoginForm(
-    modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState,
-    username: String,
-    onUsernameChanged: (String) -> Unit,
-    onConfirmed: () -> Unit,
-    isConfirmClicked: Boolean
+fun ListItem(
+    items: List<String>
 ) {
-    LaunchedEffect(isConfirmClicked, username) {
-        if (isConfirmClicked && username.isNotEmpty()) {
-            snackbarHostState.showSnackbar(
-                "Hello $username"
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(items) {
+            Text(
+                text = it,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
             )
-        }
-    }
-    Scaffold(
-        modifier = modifier,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 20.dp)
-                .fillMaxSize()
-                .wrapContentSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.End,
-        ) {
-            OutlinedTextField(
-                value = username,
-                onValueChange = onUsernameChanged,
-                modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text(text = "Enter username")
-                },
-                singleLine = true,
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            OutlinedButton(onClick = onConfirmed) {
-                Text(text = "Confirm")
-            }
         }
     }
 }
