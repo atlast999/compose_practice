@@ -18,8 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -78,11 +84,26 @@ fun ImageCard(
                 contentAlignment = Alignment.BottomStart,
             ) {
                 Text(
-                    text = title,
+                    text = buildAnnotatedString {
+                        append(title)
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color.Cyan,
+                                fontStyle = FontStyle.Normal,
+                                fontFamily = FontFamily.Default,
+                                textDecoration = TextDecoration.None,
+                            )
+                        ) {
+                            append(" =))")
+                        }
+                    },
                     style = TextStyle(
                         color = Color.White,
-                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 40.sp,
                         fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.Cursive,
+                        textDecoration = TextDecoration.Underline,
                     )
                 )
             }
