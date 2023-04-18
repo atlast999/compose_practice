@@ -7,18 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -74,17 +64,122 @@ class MainActivity : ComponentActivity() {
                 var board by remember {
                     mutableStateOf(Board())
                 }
+
                 BoardComponent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(this.maxWidth)
-                        .background(Color.LightGray),
+                        .background(Color(0xE6FDD458)),
                     board = board,
                 ) { row, col ->
                     board = board.selectCell(row, col)
                 }
+
             }
         }
+    }
+}
+
+@Composable
+fun BoardSkeleton(
+    modifier: Modifier = Modifier,
+) {
+    Canvas(
+        modifier = modifier,
+    ) {
+        val cellWidth = this.size.width.div(5)
+        val topLeft = this.center - Offset(cellWidth * 2, cellWidth * 2)
+        val borderSize = Size(4 * cellWidth, 4 * cellWidth)
+        drawRect(
+            color = Color.Black,
+            topLeft = topLeft,
+            size = borderSize,
+            style = Stroke(
+                width = 1.dp.toPx(),
+            )
+        )
+        val topRight = topLeft + Offset(borderSize.width, 0f)
+        val bottomLeft = topLeft + Offset(0f, borderSize.width)
+        val bottomRight = topLeft + Offset(borderSize.width, borderSize.height)
+        drawLine(
+            color = Color.Black,
+            start = topLeft,
+            end = bottomRight,
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = topRight,
+            end = bottomLeft,
+            strokeWidth = 1.dp.toPx(),
+        )
+        val topMid = topLeft + Offset(borderSize.width.div(2), 0f)
+        val bottomMid = bottomLeft + Offset(borderSize.width.div(2), 0f)
+        val leftMid = topLeft + Offset(0f, borderSize.width.div(2))
+        val rightMid = topRight + Offset(0f, borderSize.width.div(2))
+        drawLine(
+            color = Color.Black,
+            start = topMid,
+            end = bottomMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = leftMid,
+            end = rightMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = topMid,
+            end = leftMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = leftMid,
+            end = bottomMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = bottomMid,
+            end = rightMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = rightMid,
+            end = topMid,
+            strokeWidth = 1.dp.toPx(),
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = topMid - Offset(cellWidth, 0f),
+            end = bottomMid - Offset(cellWidth, 0f),
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = topMid + Offset(cellWidth, 0f),
+            end = bottomMid + Offset(cellWidth, 0f),
+            strokeWidth = 1.dp.toPx(),
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = leftMid - Offset(0f, cellWidth),
+            end = rightMid - Offset(0f, cellWidth),
+            strokeWidth = 1.dp.toPx(),
+        )
+        drawLine(
+            color = Color.Black,
+            start = leftMid + Offset(0f, cellWidth),
+            end = rightMid + Offset(0f, cellWidth),
+            strokeWidth = 1.dp.toPx(),
+        )
     }
 }
 
@@ -94,23 +189,29 @@ fun BoardComponent(
     board: Board,
     onCellSelected: (Int, Int) -> Unit,
 ) {
-    Column(
-        modifier = modifier,
-    ) {
-        board.cells.forEachIndexed { row, cells ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(1f.div(5 - row))
-            ) {
-                cells.forEachIndexed { col, cell ->
-                    CellComponent(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(1f.div(5 - col)),
-                        cell = cell,
-                    ) {
-                        onCellSelected.invoke(row, col)
+    Box(modifier = modifier) {
+        BoardSkeleton(
+            modifier = Modifier
+                .fillMaxSize(),
+        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            board.cells.forEachIndexed { row, cells ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(1f.div(5 - row))
+                ) {
+                    cells.forEachIndexed { col, cell ->
+                        CellComponent(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(1f.div(5 - col)),
+                            cell = cell,
+                        ) {
+                            onCellSelected.invoke(row, col)
+                        }
                     }
                 }
             }
@@ -122,16 +223,12 @@ fun BoardComponent(
 fun CellComponent(
     modifier: Modifier = Modifier,
     cell: Cell,
-    borderColor: Color = Color.Black,
     onPieceSelected: () -> Unit
 ) {
     Box(
         modifier = modifier
-            .clickable(onClick = onPieceSelected)
-            .border(
-                width = 1.dp,
-                color = borderColor,
-            ),
+            .background(Color.Transparent)
+            .clickable(onClick = onPieceSelected),
         contentAlignment = Alignment.Center,
     ) {
         when (cell.state) {
