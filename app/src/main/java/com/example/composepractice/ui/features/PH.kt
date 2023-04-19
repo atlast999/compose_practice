@@ -79,29 +79,29 @@ class Board(
 
     private fun removeHint(
         cell: Cell? = selectedCell,
-        movements: List<CellMovement> = cell?.getPossibleMovements() ?: emptyList()
+        movements: List<Pair<Int, Int>> = cell?.getPossibleMovements() ?: emptyList()
     ) {
         cell ?: return
-        movements.forEach { move ->
+        movements.forEach { (offsetX, offsetY) ->
             val movableCell =
-                this.cells[cell.id.first + move.direction.first][cell.id.second + move.direction.second]
+                this.cells[cell.id.first + offsetX][cell.id.second + offsetY]
             movableCell.hintState = CellState.EMPTY
         }
     }
 
     private fun showHint(
         cell: Cell? = this.selectedCell,
-        movements: List<CellMovement> = cell?.getPossibleMovements() ?: emptyList()
+        movements: List<Pair<Int, Int>> = cell?.getPossibleMovements() ?: emptyList()
     ) {
         cell ?: return
-        movements.forEach { move ->
+        movements.forEach { (offsetX, offsetY) ->
             val movableCell =
-                this.cells[cell.id.first + move.direction.first][cell.id.second + move.direction.second]
+                this.cells[cell.id.first + offsetX][cell.id.second + offsetY]
             movableCell.hintState = cell.state
         }
     }
 
-    private fun Cell.getPossibleMovements(): List<CellMovement> {
+    private fun Cell.getPossibleMovements(): List<Pair<Int, Int>> {
         val movements = when (this) {
             is Cell.FourDirectionCell -> arrayOf(
                 CellMovement.Up,
@@ -118,7 +118,37 @@ class Board(
             if (x !in validRange || y !in validRange) return@filter false
             if (this@Board.cells[x][y].state != CellState.EMPTY) return@filter false
             true
+        }.map { it.direction } + this.getCapturingMovements()
+    }
+
+    private fun Cell.getCapturingMovements(): List<Pair<Int, Int>> {
+        if (this.state !in setOf(
+                CellState.WHITE_KING_OCCUPIED,
+                CellState.BLACK_KING_OCCUPIED
+            )
+        ) return emptyList()
+        val movements = when (this) {
+            is Cell.FourDirectionCell -> arrayOf(
+                CellMovement.Up,
+                CellMovement.Down,
+                CellMovement.Left,
+                CellMovement.Right,
+            )
+            is Cell.EightDirectionCell -> CellMovement.values()
         }
+        val validRange = 0 until BoardSize
+        return movements.filter { move ->
+            val xHelper = this.id.first + move.direction.first
+            val yHelper = this.id.second + move.direction.second
+            if (xHelper !in validRange || yHelper !in validRange) return@filter false
+            if (this@Board.cells[xHelper][yHelper].state.type != this.state.type) return@filter false
+            val xTarget = this.id.first + move.direction.first * 2
+            val yTarget = this.id.second + move.direction.second * 2
+            if (xTarget !in validRange || yTarget !in validRange) return@filter false
+            if (this@Board.cells[xTarget][yTarget].state == CellState.EMPTY) return@filter false
+            if (this@Board.cells[xTarget][yTarget].state.type == this.state.type) return@filter false
+            true
+        }.map { it.direction.first.times(2) to it.direction.second.times(2) }
     }
 
     private fun copy(
@@ -134,13 +164,13 @@ class Board(
 }
 
 enum class CellMovement(val direction: Pair<Int, Int>) {
-    Up(0 to -1),
-    Down(0 to 1),
-    Left(-1 to 0),
-    Right(1 to 0),
+    Up(-1 to 0),
+    Down(1 to 0),
+    Left(0 to -1),
+    Right(0 to 1),
     UpLeft(-1 to -1),
-    UpRight(1 to -1),
-    DownLeft(-1 to 1),
+    UpRight(-1 to 1),
+    DownLeft(1 to -1),
     DownRight(1 to 1),
 }
 

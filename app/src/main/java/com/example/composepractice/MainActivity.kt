@@ -10,6 +10,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,8 +23,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,7 +58,16 @@ class MainActivity : ComponentActivity() {
                 ) { row, col ->
                     board = board.selectCell(row, col)
                 }
-
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(50.dp)
+                        .clickable {
+                            board = Board()
+                        }
+                )
             }
         }
     }
@@ -223,29 +233,6 @@ fun CellComponent(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        @Composable
-        fun drawHint(state: CellState) {
-            val hintModifier = Modifier.alpha(0.5f)
-            when (state) {
-                CellState.WHITE_PAWN_OCCUPIED -> PawnPiece(
-                    modifier = hintModifier,
-                    color = Color.White,
-                )
-                CellState.WHITE_KING_OCCUPIED -> KingPiece(
-                    modifier = hintModifier,
-                    color = Color.White,
-                )
-                CellState.BLACK_PAWN_OCCUPIED -> PawnPiece(
-                    modifier = hintModifier,
-                    color = Color.Black,
-                )
-                CellState.BLACK_KING_OCCUPIED -> KingPiece(
-                    modifier = hintModifier,
-                    color = Color.Black,
-                )
-                else -> {}
-            }
-        }
         when (cell.state) {
             CellState.WHITE_PAWN_OCCUPIED -> PawnPiece(
                 color = Color.White,
@@ -263,9 +250,28 @@ fun CellComponent(
                 color = Color.Black,
                 selected = isSelected,
             )
-            else -> {
-                drawHint(state = cell.hintState)
-            }
+            else -> {}
+        }
+
+        val hintModifier = Modifier.alpha(0.5f)
+        when (cell.hintState) {
+            CellState.WHITE_PAWN_OCCUPIED -> PawnPiece(
+                modifier = hintModifier,
+                color = Color.White,
+            )
+            CellState.WHITE_KING_OCCUPIED -> KingPiece(
+                modifier = hintModifier,
+                color = Color.White,
+            )
+            CellState.BLACK_PAWN_OCCUPIED -> PawnPiece(
+                modifier = hintModifier,
+                color = Color.Black,
+            )
+            CellState.BLACK_KING_OCCUPIED -> KingPiece(
+                modifier = hintModifier,
+                color = Color.Black,
+            )
+            else -> {}
         }
     }
 }
