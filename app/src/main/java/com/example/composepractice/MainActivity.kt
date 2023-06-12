@@ -10,11 +10,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -23,52 +25,77 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.composepractice.ui.features.Board
 import com.example.composepractice.ui.features.Cell
 import com.example.composepractice.ui.features.CellState
+import com.example.composepractice.ui.theme.ComposePracticeTheme
+import com.example.composepractice.ui.theme.spacing
+import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                var board by remember {
-                    mutableStateOf(Board())
-                }
-                Text(
-                    text = if (board.currentTurn == Board.WhiteTurn) "White turn"
-                    else "Black turn",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                BoardComponent(
+            ComposePracticeTheme {
+                Surface(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .background(Color(0xE6FDD458)),
-                    board = board,
-                ) { row, col ->
-                    board = board.selectCell(row, col)
+                        .fillMaxSize()
+                        .background(
+                            color = MaterialTheme.colorScheme.background,
+                            shape = RoundedCornerShape(MaterialTheme.spacing.medium)
+                        )
+                        .padding(
+                            vertical = MaterialTheme.spacing.medium_x,
+                            horizontal = MaterialTheme.spacing.medium,
+                        ),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    DestinationsNavHost(
+                        navGraph = NavGraphs.root,
+                    )
                 }
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .width(50.dp)
-                        .height(50.dp)
-                        .clickable {
-                            board = Board()
-                        }
-                )
             }
+
+
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize(),
+//                verticalArrangement = Arrangement.Center,
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//            ) {
+//                var board by remember {
+//                    mutableStateOf(Board())
+//                }
+//                Text(
+//                    text = if (board.currentTurn == Board.WhiteTurn) "White turn"
+//                    else "Black turn",
+//                    fontSize = 30.sp,
+//                    fontWeight = FontWeight.Bold,
+//                )
+//                BoardComponent(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .aspectRatio(1f)
+//                        .background(Color(0xE6FDD458)),
+//                    board = board,
+//                ) { row, col ->
+//                    board = board.selectCell(row, col)
+//                }
+//                Icon(
+//                    imageVector = Icons.Default.Refresh,
+//                    contentDescription = "",
+//                    modifier = Modifier
+//                        .width(50.dp)
+//                        .height(50.dp)
+//                        .clickable {
+//                            board = Board()
+//                        }
+//                )
+//            }
         }
     }
 }
